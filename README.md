@@ -25,16 +25,16 @@
 
 ## 📦 Folder Structure
 
-AirDraw/  
-├── public/  
-│   ├── icons/             → SVG icons (pen icon)  
-│   └── index.html         → Main entry HTML  
-├── src/  
-│   ├── css/styles.css     → Styling and layout  
-│   └── js/  
-│       ├── app.js         → Main app logic and canvas  
-│       ├── camera.js      → Camera setup  
-│       └── mediapipeHands.js → Hand tracking logic  
+AirDraw/
+├── public/
+│   ├── icons/             → SVG icons (pen icon)
+│   ├── index.html         → Main entry HTML
+│   └── src/
+│       ├── css/styles.css     → Styling and layout
+│       └── js/
+│           ├── app.js         → Main app logic and canvas
+│           ├── camera.js      → Camera setup
+│           └── mediapipeHands.js → Hand tracking logic
 └── README.md
 
 ---
