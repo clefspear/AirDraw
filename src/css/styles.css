@@ -1,0 +1,71 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  background: white;
+}
+
+#draw-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+  cursor: none; /* Hide default cursor */
+}
+
+#webcam-video {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 150px;
+  height: 112px; /* 4:3 ratio */
+  border: 2px solid #333;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 10;
+}
+
+#pointer {
+  position: fixed;
+  pointer-events: none;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#pointer-circle {
+  width: 24px;
+  height: 24px;
+  background: red;
+  border-radius: 50%;
+  box-shadow: 0 0 6px red;
+}
+
+#pen-icon {
+  width: 24px;
+  height: 24px;
+}
+
+#tools {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 30;
+}
+
+#tools button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#tools button.active {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
