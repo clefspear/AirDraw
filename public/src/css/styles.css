@@ -8,14 +8,16 @@ html, body {
 
 #draw-canvas {
   position: fixed;
-  top: 0; left: 0;
+  top: 0; 
+  left: 0;
   width: 100vw;
   height: 100vh;
   touch-action: none;
   cursor: none; /* Hide default cursor */
 }
 
-#webcam-video {
+/* Camera */
+.camera-container {
   position: fixed;
   bottom: 10px;
   right: 10px;
@@ -23,10 +25,40 @@ html, body {
   height: 112px; /* 4:3 ratio */
   border: 2px solid #333;
   border-radius: 8px;
-  object-fit: cover;
+  overflow: hidden;
   z-index: 10;
 }
 
+#webcam-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirror camera */
+}
+
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+#camera-fingers {
+  position: absolute;
+  top: 5px;
+  right: 5px; /* Position on the camera feed */
+  z-index: 11;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+/* Pointer */
 #pointer {
   position: fixed;
   pointer-events: none;
@@ -49,11 +81,14 @@ html, body {
   height: 24px;
 }
 
+/* Tools */
 #tools {
   position: fixed;
   top: 10px;
   left: 10px;
   z-index: 30;
+  display: flex;
+  gap: 10px;
 }
 
 #tools button {
@@ -61,6 +96,14 @@ html, body {
   padding: 8px 16px;
   font-size: 16px;
   cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+#tools button:hover {
+  background-color: #f3f3f3;
 }
 
 #tools button.active {
@@ -68,4 +111,33 @@ html, body {
   color: white;
   border: none;
   border-radius: 4px;
+}
+
+/* Debug panel styling */
+#debug-info {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.75);
+  color: #0f0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: monospace;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  max-width: 260px;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: opacity 0.3s ease;
+}
+
+/* Utility class to toggle debug panel visibility */
+.debug-hidden {
+  opacity: 0.2;
+}
+
+.debug-hidden:hover {
+  opacity: 1;
 }
