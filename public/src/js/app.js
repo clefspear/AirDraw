@@ -1,3 +1,5 @@
+//npx http-server ./public
+
 import { setupCamera } from './camera.js';
 import { initHands, sendVideoToHands } from './mediapipeHands.js';
 
