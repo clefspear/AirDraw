@@ -1,5 +1,6 @@
 import { setupCamera } from './camera.js';
 import { initHands, sendVideoToHands } from './mediapipeHands.js';
+//npx http-server ./public  
 
 const videoElement = document.getElementById('webcam-video');
 const canvas = document.getElementById('draw-canvas');
