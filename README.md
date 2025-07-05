@@ -1,7 +1,5 @@
 # ✍️ AirDraw
 
-![Screenshot 2025-07-04 at 11 04 35 PM](https://github.com/user-attachments/assets/ead6de89-aa79-450f-a3cd-67acc5375263)
-
 **AirDraw** is a browser-based virtual whiteboard that lets you draw in the air using just your **fingertips** — no touchscreen or stylus required. It uses your **webcam** (phone or desktop) and real-time **hand tracking** with **MediaPipe** to turn your index finger into a pen or eraser.
 
 ---
@@ -15,6 +13,7 @@
 - Clean, full-screen canvas with live camera preview
 
 ---
+![Screenshot 2025-07-04 at 11 04 35 PM](https://github.com/user-attachments/assets/ead6de89-aa79-450f-a3cd-67acc5375263)
 
 ## 🛠️ Built With
 
