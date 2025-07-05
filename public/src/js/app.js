@@ -99,20 +99,10 @@ function updateCameraFingersInfo(results) {
     return;
   }
   
-  // Important: We need to use the SAME mirrored coordinates that we use for drawing
-  // Since we're using (1 - indexTip.x) in onResults, we need to use the same here
-  const landmarks = results.multiHandLandmarks[0];
-  const mirroredX = (1 - landmarks[0].x) * window.innerWidth; // Mirror and scale to screen width
-  
-  // The screen center is the reference point
-  const screenCenter = window.innerWidth / 2;
-  
-  // If the mirrored X position is left of center, it's the LEFT hand
-  if (mirroredX < screenCenter) {
-    handedness = 'Left';
-  } else {
-    handedness = 'Right';
-  }
+  // Get handedness from MediaPipe's detection
+  // This is more reliable than trying to guess based on position
+  const detectedHandedness = results.multiHandedness[0].label;
+  handedness = detectedHandedness === 'Left' ? 'Right' : 'Left'; // "Left" or "Right"
   
   cameraFingers.textContent = `${handedness} hand`;
   cameraFingers.style.color = '#0a0';
