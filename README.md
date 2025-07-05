@@ -36,6 +36,7 @@
 │       └── js/
 │           ├── app.js          → Main app logic and canvas
 │           ├── camera.js       → Camera setup
+│           ├── debug.js        → Debug panel and visualization
 │           └── mediapipeHands.js → Hand tracking logic
 └── README.md
 </pre>
