@@ -13,6 +13,7 @@
 - Clean, full-screen canvas with live camera preview
 
 ---
+![Screenshot 2025-07-04 at 11 04 35 PM](https://github.com/user-attachments/assets/ead6de89-aa79-450f-a3cd-67acc5375263)
 
 ## 🛠️ Built With
 
