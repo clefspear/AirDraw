@@ -89,8 +89,7 @@ debugToggleBtn.addEventListener('click', () => {
   }
 });
 
-// Camera status update
-// Camera status update
+// Camera status update - use pointer position for handedness
 function updateCameraFingersInfo(results) {
   if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
     cameraFingers.textContent = 'No hand';
@@ -100,17 +99,19 @@ function updateCameraFingersInfo(results) {
     return;
   }
   
-  // Determine which hand is being used based on the x-position
-  // This is more reliable than the MediaPipe labeling when using mirrored video
+  // Important: We need to use the SAME mirrored coordinates that we use for drawing
+  // Since we're using (1 - indexTip.x) in onResults, we need to use the same here
   const landmarks = results.multiHandLandmarks[0];
-  const wristX = landmarks[0].x; // Wrist position (normalized 0-1)
+  const mirroredX = (1 - landmarks[0].x) * window.innerWidth; // Mirror and scale to screen width
   
-  // If wristX is < 0.5, it's on the left side of the screen
-  // Due to mirroring, this means it's the right hand in reality
-  if (wristX < 0.5) {
-    handedness = 'Right';
-  } else {
+  // The screen center is the reference point
+  const screenCenter = window.innerWidth / 2;
+  
+  // If the mirrored X position is left of center, it's the LEFT hand
+  if (mirroredX < screenCenter) {
     handedness = 'Left';
+  } else {
+    handedness = 'Right';
   }
   
   cameraFingers.textContent = `${handedness} hand`;
@@ -172,7 +173,8 @@ function onResults(results) {
   const indexTip = landmarks[8];
   
   // Coordinates normalized [0,1], invert y for canvas
-  const x = indexTip.x * window.innerWidth;
+  // Mirror the x-coordinate to match the mirrored webcam feed
+  const x = (1 - indexTip.x) * window.innerWidth; // Mirror the x-coordinate
   const y = indexTip.y * window.innerHeight;
   
   // Move pointer
