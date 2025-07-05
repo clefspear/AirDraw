@@ -90,7 +90,6 @@ debugToggleBtn.addEventListener('click', () => {
 });
 
 // Camera status update - use pointer position for handedness
-// Camera status update
 function updateCameraFingersInfo(results) {
   if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
     cameraFingers.textContent = 'No hand';
@@ -100,20 +99,10 @@ function updateCameraFingersInfo(results) {
     return;
   }
   
-  // Determine which hand is being used based on the x-position
-  // This is more reliable than the MediaPipe labeling when using mirrored video
-  const landmarks = results.multiHandLandmarks[0];
-  const wristX = landmarks[0].x; // Wrist position (normalized 0-1)
-  
-  // Because we're flipping the x-coordinate in the drawing function,
-  // we need to be consistent here:
-  // If wristX is > 0.5, it's on the right side of the actual screen
-  // Due to our mirroring adjustment, this means it's the right hand in reality
-  if (wristX > 0.5) {
-    handedness = 'Right';
-  } else {
-    handedness = 'Left';
-  }
+  // Get handedness from MediaPipe's detection
+  // This is more reliable than trying to guess based on position
+  const detectedHandedness = results.multiHandedness[0].label;
+  handedness = detectedHandedness === 'Left' ? 'Right' : 'Left'; // "Left" or "Right"
   
   cameraFingers.textContent = `${handedness} hand`;
   cameraFingers.style.color = '#0a0';
