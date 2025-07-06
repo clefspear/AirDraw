@@ -8,10 +8,10 @@ export function initHands(onResultsCallback) {
   });
 
   hands.setOptions({
-    maxNumHands: 1,
+    maxNumHands: 2, // Set to 2 to enable dual-hand tracking
     modelComplexity: 1,
-    minDetectionConfidence: 0.8,
-    minTrackingConfidence: 0.8,
+    minDetectionConfidence: 0.7, // Slightly lower threshold for better detection
+    minTrackingConfidence: 0.7,
   });
 
   hands.onResults(onResultsCallback);

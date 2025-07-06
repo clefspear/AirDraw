@@ -1,5 +1,4 @@
 // AirDraw Debug Helper
-// Add this to a file called debug.js in your /src/js/ directory
 
 (function() {
   // Wait for DOM to be ready
@@ -22,7 +21,7 @@
       left: '10px',
       zIndex: '9999',
       background: 'rgba(0, 0, 0, 0.75)',
-      color: '#0f0',
+      color: '#0f0', // Always use green text
       padding: '10px 12px',
       borderRadius: '6px',
       fontSize: '12px',
@@ -31,7 +30,8 @@
       whiteSpace: 'pre-wrap',
       lineHeight: '1.4',
       border: '1px solid rgba(255, 255, 255, 0.2)',
-      display: 'block'
+      display: 'block',
+      opacity: '1'
     });
     
     // Create or fix camera-fingers
@@ -73,19 +73,16 @@
       }
     }
     
-    // Add toggle functionality
-    if (debugToggleBtn) {
-      debugToggleBtn.addEventListener('click', function() {
-        const isHidden = debugInfo.style.opacity === '0.2';
-        debugInfo.style.opacity = isHidden ? '1' : '0.2';
-        this.textContent = isHidden ? 'Hide' : 'Debug';
-      });
-    }
+    // NOTE: We don't add any click or keyboard event handlers for debug toggle
+    // as those are now handled exclusively in app.js
     
     // Variables for debug info
     let frameCount = 0;
     let lastFrameTime = performance.now();
     let fps = 0;
+    
+    // Tell app.js that debug.js is active
+    window.debugJsActive = true;
     
     // Update loop
     function updateDebug() {
@@ -99,38 +96,124 @@
         lastFrameTime = now;
       }
       
-      // Get tool info
-      const tool = document.querySelector('#pen-btn.active') ? 'pen' : 'eraser';
+      // Get tool info from global state if available
+      const tool = window.airdrawState ? window.airdrawState.tool : 'pen';
+      
+      // Get color info from global state if available
+      const colorInfo = window.airdrawState ? `Color: ${window.airdrawState.penColor}\n` : '';
       
       // Update debug text
       debugInfo.textContent = 
         `FPS: ${fps}\n` +
-        `Tool: ${tool}\n` +
+        `Tool: ${tool === 'pen' ? 'Pen' : (tool === 'eraser' ? 'Eraser' : tool)}\n` +
+        colorInfo +
         `Time: ${new Date().toLocaleTimeString()}\n` +
-        `Window: ${window.innerWidth}x${window.innerHeight}\n`;
+        `Window: ${window.innerWidth}x${window.innerHeight}`;
       
-      // Check if hand is detected - we can look at the pointer display
+      // Check for hand detection status
       const pointer = document.getElementById('pointer');
+      const pointer2 = document.getElementById('pointer2');
+      const handStatuses = [];
+      
+      // Initialize variables to track hands and fingers
+      let totalFingerCount = 0;
+      let leftHandPresent = false;
+      let rightHandPresent = false;
+      let leftFingerCount = 0;
+      let rightFingerCount = 0;
+      
+      // First hand
       if (pointer && getComputedStyle(pointer).display !== 'none') {
-        // Try to get hand position from transform
         const transform = pointer.style.transform;
-        let x = 0, y = 0;
-        
         if (transform) {
           const match = transform.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
           if (match && match.length === 3) {
-            x = parseFloat(match[1]) + 12; // Add back the offset
-            y = parseFloat(match[2]) + 12;
+            const x = parseFloat(match[1]) + 12;
+            const y = parseFloat(match[2]) + 12;
             
-            debugInfo.textContent += `Hand detected\nPosition: ${Math.round(x)}px, ${Math.round(y)}px`;
-          } else {
-            debugInfo.textContent += 'Hand detected';
+            // Get handedness from app.js state - FIX: Correct display for mirrored view
+            const handInfo1 = window.handedness || '';
+            // Fix for handedness display (flipped in the UI)
+            const displayHandedness = handInfo1 === 'Left' ? 'Right' : (handInfo1 === 'Right' ? 'Left' : handInfo1);
+            
+            // Track which hand is present
+            if (displayHandedness === 'Left') leftHandPresent = true;
+            if (displayHandedness === 'Right') rightHandPresent = true;
+            
+            // Get finger count for this hand
+            const fingerCount = window.airdrawState?.fingerCount || 0;
+            totalFingerCount += fingerCount;
+            
+            // Store finger count by hand
+            if (displayHandedness === 'Left') leftFingerCount = fingerCount;
+            if (displayHandedness === 'Right') rightFingerCount = fingerCount;
+            
+            // Only add position info if we're showing just one hand
+            if (!pointer2 || getComputedStyle(pointer2).display === 'none') {
+              handStatuses.push(`Hand: ${displayHandedness}`);
+              handStatuses.push(`Position: ${Math.round(x)}px, ${Math.round(y)}px`);
+            }
           }
-        } else {
-          debugInfo.textContent += 'Hand detected';
         }
+      }
+      
+      // Second hand
+      if (pointer2 && getComputedStyle(pointer2).display !== 'none') {
+        const transform = pointer2.style.transform;
+        if (transform) {
+          const match = transform.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
+          if (match && match.length === 3) {
+            // For the second hand, we need to determine its handedness
+            // It's usually the opposite of the first hand
+            const firstHandedness = window.handedness || '';
+            const secondHandedness = firstHandedness === 'Left' ? 'Right' : 'Left';
+            
+            // Fix for handedness display (flipped in the UI)
+            const displayHandedness = secondHandedness === 'Left' ? 'Right' : 'Left';
+            
+            // Track which hand is present
+            if (displayHandedness === 'Left') leftHandPresent = true;
+            if (displayHandedness === 'Right') rightHandPresent = true;
+            
+            // Estimate finger count for second hand (we don't have direct access)
+            // This is a rough approximation - could be improved with better data sharing
+            const fingerCount = 1; // Assume at least index finger is up
+            totalFingerCount += fingerCount;
+            
+            // Store finger count by hand
+            if (displayHandedness === 'Left') leftFingerCount = fingerCount;
+            if (displayHandedness === 'Right') rightFingerCount = fingerCount;
+          }
+        }
+      }
+      
+      // Create a combined hands status when both hands are present
+      if (leftHandPresent && rightHandPresent) {
+        handStatuses.push(`Hands: Left & Right`);
+      } else if (leftHandPresent) {
+        handStatuses.push(`Hand: Left`);
+      } else if (rightHandPresent) {
+        handStatuses.push(`Hand: Right`);
+      }
+      
+      // Add finger count info
+      if (totalFingerCount > 0) {
+        handStatuses.push(`Fingers up: ${totalFingerCount}`);
+      }
+      
+      // Add hand detection status
+      if (handStatuses.length > 0) {
+        debugInfo.textContent += "\n" + handStatuses.join("\n");
       } else {
-        debugInfo.textContent += 'No hand detected';
+        debugInfo.textContent += "\nNo hands detected";
+      }
+      
+      // Add current color highlight notification if color changed recently
+      const colorNotification = document.getElementById('color-notification');
+      if (colorNotification && getComputedStyle(colorNotification).opacity !== '0') {
+        // Ensure the debug info is visible when color changes
+        debugInfo.style.opacity = '1';
+        if (debugToggleBtn) debugToggleBtn.textContent = 'Hide';
       }
       
       // Continue the loop

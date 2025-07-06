@@ -58,8 +58,8 @@ html, body {
   transition: color 0.3s ease;
 }
 
-/* Pointer */
-#pointer {
+/* Pointers */
+#pointer, #pointer2 {
   position: fixed;
   pointer-events: none;
   z-index: 20;
@@ -68,7 +68,7 @@ html, body {
   gap: 6px;
 }
 
-#pointer-circle {
+#pointer-circle, #pointer-circle2 {
   width: 24px;
   height: 24px;
   background: red;
@@ -76,7 +76,7 @@ html, body {
   box-shadow: 0 0 6px red;
 }
 
-#pen-icon {
+#pen-icon, #pen-icon2 {
   width: 24px;
   height: 24px;
 }
@@ -113,6 +113,17 @@ html, body {
   border-radius: 4px;
 }
 
+/* Voice button styles */
+#voice-btn.voice-active {
+  background-color: #4CAF50 !important;
+  color: white !important;
+}
+
+#voice-btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
 /* Debug panel styling */
 #debug-info {
   position: fixed;
@@ -120,7 +131,7 @@ html, body {
   left: 10px;
   z-index: 40;
   background: rgba(0, 0, 0, 0.75);
-  color: #0f0;
+  color: #0f0 !important; /* Force green text */
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -130,7 +141,101 @@ html, body {
   white-space: pre-wrap;
   line-height: 1.4;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: opacity 0.3s ease, display 0.3s ease;
+}
+
+/* Color notification */
+#color-notification {
+  position: fixed;
+  bottom: 200px; /* Position well above the debug panel */
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: sans-serif;
+  z-index: 9999;
+  opacity: 0;
   transition: opacity 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Color display */
+#current-color {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+#color-swatch {
+  width: 30px;
+  height: 30px;
+  background-color: #FF0000;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin-right: 8px;
+}
+
+#color-name {
+  font-family: sans-serif;
+  font-size: 14px;
+}
+
+#color-help {
+  margin-left: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+}
+
+/* Help dialog */
+#color-help-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 2000;
+  max-width: 400px;
+  display: none;
+}
+
+#color-help-dialog h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+#color-help-dialog ul {
+  padding-left: 20px;
+}
+
+#color-help-dialog li {
+  margin-bottom: 8px;
+}
+
+#close-help {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
 /* Utility class to toggle debug panel visibility */
