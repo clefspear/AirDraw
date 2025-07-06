@@ -306,7 +306,7 @@
       } else if (rightHandPresent) {
         debugInfo.textContent += "\nHand: Right";
       } else {
-        debugInfo.textContent += "\nNo hands detected";
+        debugInfo.textContent += "\nHand: ";
       }
       
       // Add position info if available
