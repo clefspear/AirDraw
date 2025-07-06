@@ -14,7 +14,7 @@ const penIcon = document.getElementById('pen-icon');
 // Debug elements
 const debugInfo = document.getElementById('debug-info');
 const cameraFingers = document.getElementById('camera-fingers');
-const debugToggleBtn = document.getElementById('debug-toggle');
+let debugToggleBtn = document.getElementById('debug-toggle');
 
 // Global variables for drawing
 let drawing = false;
@@ -36,6 +36,10 @@ let isHandDetected = false;
 let handedness = '';
 let fingerCount = 0; // Track number of fingers up
 
+// Confirmation dialog variables
+let clearConfirmationActive = false;
+let confirmationTimer = null;
+
 // Make hand information available globally
 window.handedness = '';
 
@@ -48,10 +52,12 @@ window.airdrawState = {
 };
 
 // This will be our centralized function to sync debug state and button text
+// This will be our centralized function to sync debug state and button text
 function syncDebugState(forceState = null) {
   const debugInfoElement = document.getElementById('debug-info');
   const debugToggleBtnElement = document.getElementById('debug-toggle');
   const colorDisplay = document.getElementById('current-color');
+  const colorHelp = document.getElementById('color-help'); // The question mark button
   
   if (!debugInfoElement || !debugToggleBtnElement) return;
   
@@ -69,10 +75,15 @@ function syncDebugState(forceState = null) {
     debugInfoElement.style.display = 'block';
     debugToggleBtnElement.textContent = 'Hide';
     
-    // Also show color display
+    // Also show color display and question mark
     if (colorDisplay) {
       colorDisplay.style.opacity = '1';
       colorDisplay.style.display = 'flex';
+    }
+    
+    // Show the question mark button
+    if (colorHelp) {
+      colorHelp.style.display = 'block';
     }
   } else {
     // Hide debug panel
@@ -80,10 +91,15 @@ function syncDebugState(forceState = null) {
     debugInfoElement.style.display = 'none';
     debugToggleBtnElement.textContent = 'Debug';
     
-    // Also hide color display
+    // Also hide color display and question mark
     if (colorDisplay) {
       colorDisplay.style.opacity = '0';
       colorDisplay.style.display = 'none';
+    }
+    
+    // Hide the question mark button
+    if (colorHelp) {
+      colorHelp.style.display = 'none';
     }
   }
   
@@ -105,6 +121,118 @@ function resizeCanvas() {
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
+// Clear canvas function
+function clearCanvas() {
+  // Hide confirmation dialog if it's visible
+  if (clearConfirmationActive) {
+    hideClearConfirmation();
+  }
+  
+  // Get the canvas and context
+  const canvas = document.getElementById('draw-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Clear the entire canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  console.log('Canvas cleared');
+  
+  // Show a quick notification
+  showQuickNotification('Canvas cleared', '#4CAF50');
+}
+
+// Show clear confirmation dialog
+function showClearConfirmation() {
+  // Create or get the confirmation dialog
+  let confirmDialog = document.getElementById('clear-confirm-dialog');
+  
+  if (!confirmDialog) {
+    confirmDialog = document.createElement('div');
+    confirmDialog.id = 'clear-confirm-dialog';
+    document.body.appendChild(confirmDialog);
+    
+    // Style the confirmation dialog
+    Object.assign(confirmDialog.style, {
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      color: 'white',
+      padding: '20px',
+      borderRadius: '8px',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+      zIndex: '10000',
+      textAlign: 'center',
+      fontFamily: 'sans-serif',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      display: 'none',
+      opacity: '0',
+      transition: 'opacity 0.3s ease',
+      minWidth: '280px'
+    });
+    
+    // Add content
+    confirmDialog.innerHTML = `
+      <h3 style="margin-top: 0; margin-bottom: 15px;">Clear Canvas?</h3>
+      <p style="margin-bottom: 20px;">Are you sure you want to clear the entire canvas?</p>
+      <div style="display: flex; justify-content: center; gap: 15px;">
+        <button id="confirm-yes" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Yes</button>
+        <button id="confirm-no" style="padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">No</button>
+      </div>
+      <p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">Press Enter again to confirm</p>
+    `;
+    
+    // Add event listeners for buttons
+    document.getElementById('confirm-yes').addEventListener('click', () => {
+      hideClearConfirmation();
+      clearCanvas();
+    });
+    
+    document.getElementById('confirm-no').addEventListener('click', () => {
+      hideClearConfirmation();
+    });
+  }
+  
+  // Show the dialog
+  confirmDialog.style.display = 'block';
+  setTimeout(() => {
+    confirmDialog.style.opacity = '1';
+  }, 10);
+  
+  // Set confirmation active flag
+  clearConfirmationActive = true;
+  
+  // Set a timer to auto-hide after 5 seconds
+  if (confirmationTimer) {
+    clearTimeout(confirmationTimer);
+  }
+  
+  confirmationTimer = setTimeout(() => {
+    hideClearConfirmation();
+  }, 5000);
+}
+
+// Hide clear confirmation dialog
+function hideClearConfirmation() {
+  const confirmDialog = document.getElementById('clear-confirm-dialog');
+  if (confirmDialog) {
+    confirmDialog.style.opacity = '0';
+    setTimeout(() => {
+      confirmDialog.style.display = 'none';
+    }, 300);
+  }
+  
+  // Reset confirmation state
+  clearConfirmationActive = false;
+  
+  // Clear the timer
+  if (confirmationTimer) {
+    clearTimeout(confirmationTimer);
+    confirmationTimer = null;
+  }
+}
 
 // Fix camera-fingers position
 function fixCameraFingersPosition() {
@@ -176,7 +304,6 @@ function createSecondPointer() {
 }
 
 // Function to update the debug button text based on the actual state of the debug panel
-// Function to update the debug button text based on the actual state of the debug panel
 function updateDebugButtonText() {
   const debugInfoElement = document.getElementById('debug-info');
   const debugToggleBtnElement = document.getElementById('debug-toggle');
@@ -216,62 +343,48 @@ function setupKeyboardShortcuts() {
       
       console.log('Debug panel toggled via keyboard shortcut');
     }
+    
+    // Press Enter/Return to clear the canvas (with confirmation)
+    if (e.key === 'Enter') {
+      // Only clear if not in an input field
+      if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        
+        if (clearConfirmationActive) {
+          // If confirmation is already showing, treat second Enter as "Yes"
+          hideClearConfirmation();
+          clearCanvas();
+          console.log('Canvas cleared via keyboard shortcut (Enter confirmation)');
+        } else {
+          // First Enter press - show confirmation
+          showClearConfirmation();
+          console.log('Clear canvas confirmation shown');
+        }
+      }
+    }
   });
   
-  console.log('Keyboard shortcuts initialized: D = toggle debug');
+  console.log('Keyboard shortcuts initialized: D = toggle debug, Enter = clear with confirmation');
 }
 
 // Initialize voice recognition
-function initializeVoiceRecognition() {
+function initializeVoiceRecognition(onColorChange) {
   try {
     // Initialize voice recognition with color change callback
-    voiceRecognition = initVoiceRecognition((hexColor, colorName) => {
-      // Update pen color
-      penColor = hexColor;
-      
-      // Update global state
-      window.airdrawState.penColor = hexColor;
-      
-      // Flash feedback for the user
-      flashColorFeedback(hexColor);
-      
-      // If color changes to very light colors, update debug text to be visible
-      updateDebugTextColor(hexColor);
-      
-      // Show color change notification
-      showColorChangeNotification(colorName, hexColor);
-      
-      // Update debug panel
-      updateDebugPanel();
-      
-      // Update pen icon color
-      updatePointerColors(hexColor);
-      
-      // Make sure debug button text stays in sync
-      syncDebugState();
-      
-      console.log(`Voice command: Changed color to ${colorName} (${hexColor})`);
-    });
+    voiceRecognition = initVoiceRecognition(onColorChange);
     
     // Store in window for access from UI
     window.voiceRecognition = voiceRecognition;
     
     console.log("Voice recognition initialized successfully");
+    return voiceRecognition;
   } catch (err) {
     console.error("Error initializing voice recognition:", err);
     
-    // Create a fallback voice button that shows an error message
-    const toolsContainer = document.getElementById('tools');
-    if (toolsContainer) {
-      const voiceBtn = document.createElement('button');
-      voiceBtn.id = 'voice-btn';
-      voiceBtn.textContent = '🎤 Voice (Unavailable)';
-      voiceBtn.style.opacity = '0.7';
-      voiceBtn.addEventListener('click', () => {
-        alert('Voice recognition is not available in this browser or requires permission. Try using Chrome or Edge.');
-      });
-      toolsContainer.appendChild(voiceBtn);
-    }
+    // Show error notification
+    showQuickNotification('Voice recognition unavailable', '#f44336');
+    
+    return null;
   }
 }
 
@@ -300,8 +413,6 @@ function updatePointerColors(hexColor) {
 }
 
 // Show a notification when color changes
-// Update the showColorChangeNotification function in app.js:
-
 function showColorChangeNotification(colorName, hexColor) {
   // Create notification element if it doesn't exist
   let notification = document.getElementById('color-notification');
@@ -364,29 +475,63 @@ function showColorChangeNotification(colorName, hexColor) {
       // After notification fades, ensure debug button text is synced with current state
       setTimeout(() => {
         // Just sync the button text with current state, don't change visibility
-        const isCurrentlyVisible = getComputedStyle(debugInfoElement).display !== 'none' && 
-                                   getComputedStyle(debugInfoElement).opacity !== '0';
-        
-        // Don't change visibility, just update the button text
-        const debugToggleBtnElement = document.getElementById('debug-toggle');
-        if (debugToggleBtnElement) {
-          debugToggleBtnElement.textContent = isCurrentlyVisible ? 'Hide' : 'Debug';
-        }
+        updateDebugButtonText();
       }, 300);
     }
   }, 3000);
   
   // Just update the button text without changing debug panel visibility
-  const debugInfoElement = document.getElementById('debug-info');
-  const debugToggleBtnElement = document.getElementById('debug-toggle');
-  
-  if (debugInfoElement && debugToggleBtnElement) {
-    const isCurrentlyVisible = getComputedStyle(debugInfoElement).display !== 'none' && 
-                               getComputedStyle(debugInfoElement).opacity !== '0';
+  updateDebugButtonText();
+}
+
+// Show a quick notification
+function showQuickNotification(message, color = '#4CAF50') {
+  // Create notification element if it doesn't exist
+  let notification = document.getElementById('quick-notification');
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'quick-notification';
+    document.body.appendChild(notification);
     
-    // Update button text based on current visibility
-    debugToggleBtnElement.textContent = isCurrentlyVisible ? 'Hide' : 'Debug';
+    // Style the notification
+    Object.assign(notification.style, {
+      position: 'fixed',
+      top: '10px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: '#fff',
+      padding: '8px 16px',
+      borderRadius: '4px',
+      fontSize: '14px',
+      fontFamily: 'sans-serif',
+      zIndex: '9999',
+      opacity: '0',
+      transition: 'opacity 0.3s ease',
+      textAlign: 'center',
+      pointerEvents: 'none',
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+      borderLeft: `4px solid ${color}`
+    });
+  } else {
+    notification.style.borderLeft = `4px solid ${color}`;
   }
+  
+  // Set notification content
+  notification.textContent = message;
+  
+  // Show notification
+  notification.style.opacity = '1';
+  
+  // Clear any existing timeout
+  if (window.quickNotificationTimeout) {
+    clearTimeout(window.quickNotificationTimeout);
+  }
+  
+  // Set a new timeout
+  window.quickNotificationTimeout = setTimeout(() => {
+    notification.style.opacity = '0';
+  }, 2000);
 }
 
 // Add visual feedback when color changes
@@ -877,12 +1022,105 @@ async function main() {
     // Start the debug update loop
     requestAnimationFrame(updateDebugLoop);
     
-    // Initialize voice recognition for color control
-    initializeVoiceRecognition();
-    
-    // Set up the debug toggle button
-    if (debugToggleBtn) {
-      debugToggleBtn.addEventListener('click', function() {
+    // Create all UI buttons in the correct order
+    const toolsContainer = document.getElementById('tools');
+    if (toolsContainer) {
+      // First, clear any existing buttons (in case they were added by other scripts)
+      while (toolsContainer.firstChild) {
+        toolsContainer.removeChild(toolsContainer.firstChild);
+      }
+      
+      // 1. Create Clear button (first position)
+      const clearBtn = document.createElement('button');
+      clearBtn.id = 'clear-btn';
+      clearBtn.textContent = '🧹 Clear';
+      clearBtn.title = 'Clear the canvas';
+      
+      // Style the button
+      Object.assign(clearBtn.style, {
+        marginRight: '10px',
+        padding: '8px 16px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        background: 'white',
+        transition: 'all 0.2s ease'
+      });
+      
+      // Add hover effect
+      clearBtn.addEventListener('mouseenter', () => {
+        clearBtn.style.backgroundColor = '#f3f3f3';
+      });
+      
+      clearBtn.addEventListener('mouseleave', () => {
+        clearBtn.style.backgroundColor = 'white';
+      });
+      
+      // Add click handler with confirmation
+      clearBtn.addEventListener('click', () => {
+        if (clearConfirmationActive) {
+          hideClearConfirmation();
+          clearCanvas();
+        } else {
+          showClearConfirmation();
+        }
+      });
+      
+      // Add Clear button to tools (first position)
+      toolsContainer.appendChild(clearBtn);
+      
+      // 2. Create Voice button (second position)
+      const voiceBtn = document.createElement('button');
+      voiceBtn.id = 'voice-btn';
+      voiceBtn.innerHTML = '🎤 Voice';
+      voiceBtn.classList.add('voice-active');
+      voiceBtn.title = 'Toggle voice recognition (or press SPACE)';
+      
+      // Style the voice button
+      Object.assign(voiceBtn.style, {
+        marginRight: '10px',
+        padding: '8px 16px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        backgroundColor: '#4CAF50', // Active state
+        color: 'white',
+        transition: 'all 0.2s ease'
+      });
+      
+      // Add Voice button to tools (second position)
+      toolsContainer.appendChild(voiceBtn);
+      
+      // 3. Create Debug button (third position)
+      const debugBtn = document.createElement('button');
+      debugBtn.id = 'debug-toggle';
+      debugBtn.textContent = 'Debug';
+      
+      // Style the debug button
+      Object.assign(debugBtn.style, {
+        marginRight: '10px',
+        padding: '8px 16px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        background: 'white',
+        transition: 'all 0.2s ease'
+      });
+      
+      // Add hover effect
+      debugBtn.addEventListener('mouseenter', () => {
+        debugBtn.style.backgroundColor = '#f3f3f3';
+      });
+      
+      debugBtn.addEventListener('mouseleave', () => {
+        debugBtn.style.backgroundColor = 'white';
+      });
+      
+      // Add click handler
+      debugBtn.addEventListener('click', function() {
         const debugInfoElement = document.getElementById('debug-info');
         if (!debugInfoElement) return;
         
@@ -892,11 +1130,70 @@ async function main() {
         // Toggle the state (show if hidden, hide if visible)
         syncDebugState(isHidden);
       });
+      
+      // Add Debug button to tools (third position)
+      toolsContainer.appendChild(debugBtn);
+      
+      // Store references to buttons
+      debugToggleBtn = debugBtn;
+      window.debugToggleBtn = debugBtn;
+      
+      console.log('UI buttons created in order: Clear, Voice, Debug');
+      
+      // Add click handler to voice button
+      voiceBtn.addEventListener('click', () => {
+        const isActive = voiceBtn.classList.contains('voice-active');
+        
+        if (isActive) {
+          // Turn off
+          voiceBtn.classList.remove('voice-active');
+          voiceBtn.innerHTML = '🎤 Voice (Off)';
+          voiceBtn.style.backgroundColor = 'white';
+          voiceBtn.style.color = '#333';
+          window.voiceRecognition?.stopListening();
+        } else {
+          // Turn on
+          voiceBtn.classList.add('voice-active');
+          voiceBtn.innerHTML = '🎤 Voice';
+          voiceBtn.style.backgroundColor = '#4CAF50';
+          voiceBtn.style.color = 'white';
+          window.voiceRecognition?.resumeListening();
+        }
+      });
     }
+    
+    // Initialize voice recognition with callback
+    initializeVoiceRecognition((hexColor, colorName) => {
+      // Update pen color
+      penColor = hexColor;
+      
+      // Update global state
+      window.airdrawState.penColor = hexColor;
+      
+      // Flash feedback for the user
+      flashColorFeedback(hexColor);
+      
+      // If color changes to very light colors, update debug text to be visible
+      updateDebugTextColor(hexColor);
+      
+      // Show color change notification
+      showColorChangeNotification(colorName, hexColor);
+      
+      // Update debug panel
+      updateDebugPanel();
+      
+      // Update pen icon color
+      updatePointerColors(hexColor);
+      
+      // Make sure debug button text stays in sync
+      updateDebugButtonText();
+      
+      console.log(`Voice command: Changed color to ${colorName} (${hexColor})`);
+    });
     
     // Make sure the button text is synchronized initially
     setTimeout(() => {
-      syncDebugState();
+      syncDebugState(false);
     }, 500);
     
     console.log("AirDraw initialized successfully");

@@ -61,15 +61,9 @@
     // Add debug toggle button if it doesn't exist
     let debugToggleBtn = document.getElementById('debug-toggle');
     if (!debugToggleBtn) {
-      console.log('Creating debug toggle button...');
-      
-      const toolsContainer = document.getElementById('tools');
-      if (toolsContainer) {
-        debugToggleBtn = document.createElement('button');
-        debugToggleBtn.id = 'debug-toggle';
-        debugToggleBtn.textContent = 'Debug';
-        toolsContainer.appendChild(debugToggleBtn);
-      }
+      console.log('Debug toggle button not found - should be created in app.js');
+    } else {
+      console.log('Using existing debug toggle button');
     }
     
     // Variables for debug info
@@ -316,18 +310,18 @@
         debugInfo.textContent += `\nFingers up: ${totalFingerCount}`;
       }
       
-// Add current color highlight notification if color changed recently
-const colorNotification = document.getElementById('color-notification');
-if (colorNotification && getComputedStyle(colorNotification).opacity !== '0') {
-  // Check current visibility of the debug panel
-  const isCurrentlyVisible = getComputedStyle(debugInfo).display !== 'none' && 
-                            getComputedStyle(debugInfo).opacity !== '0';
-  
-  // Just update the button text without changing the panel visibility
-  if (debugToggleBtn) {
-    debugToggleBtn.textContent = isCurrentlyVisible ? 'Hide' : 'Debug';
-  }
-}
+      // Add current color highlight notification if color changed recently
+      const colorNotification = document.getElementById('color-notification');
+      if (colorNotification && getComputedStyle(colorNotification).opacity !== '0') {
+        // Check current visibility of the debug panel
+        const isCurrentlyVisible = getComputedStyle(debugInfo).display !== 'none' && 
+                                  getComputedStyle(debugInfo).opacity !== '0';
+        
+        // Just update the button text without changing the panel visibility
+        if (debugToggleBtn) {
+          debugToggleBtn.textContent = isCurrentlyVisible ? 'Hide' : 'Debug';
+        }
+      }
       
       // Continue the loop
       requestAnimationFrame(updateDebug);

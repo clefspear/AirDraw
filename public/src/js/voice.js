@@ -364,34 +364,13 @@ function createVoiceUI() {
   }
   
   console.log('Creating voice UI elements');
-  
-  // Create voice control button
-  const toolsContainer = document.getElementById('tools');
-  
-  if (toolsContainer) {
-    const voiceBtn = document.createElement('button');
-    voiceBtn.id = 'voice-btn';
-    voiceBtn.innerHTML = '🎤 Voice';
-    voiceBtn.classList.add('voice-active');
-    voiceBtn.title = 'Toggle voice recognition (or press SPACE)';
-    toolsContainer.appendChild(voiceBtn);
-    
-    // Toggle voice recognition
-    voiceBtn.addEventListener('click', () => {
-      const isActive = voiceBtn.classList.contains('voice-active');
-      
-      if (isActive) {
-        // Turn off
-        voiceBtn.classList.remove('voice-active');
-        voiceBtn.innerHTML = '🎤 Voice (Off)';
-        window.voiceRecognition?.stopListening();
-      } else {
-        // Turn on
-        voiceBtn.classList.add('voice-active');
-        voiceBtn.innerHTML = '🎤 Voice';
-        window.voiceRecognition?.resumeListening();
-      }
-    });
+
+  // Voice button is now created in app.js
+  const voiceBtn = document.getElementById('voice-btn');
+  if (!voiceBtn) {
+    console.log('Voice button not found - should be created in app.js');
+  } else {
+    console.log('Using existing voice button');
   }
   
   // Create color display
@@ -479,7 +458,8 @@ function createVoiceUI() {
       <li><strong>Random:</strong> "random color"</li>
     </ul>
     <p>Over 140 named colors are supported!</p>
-    <p><small>Toggle voice recognition with the Voice button or by pressing SPACE</small></p>
+    <p><small>Toggle Clearing the Canvas with the Clear button or by pressing Enter/Return</small></p>
+    <p><small>Toggle Voice Recognition with the Voice button or by pressing SPACE</small></p>
     <button id="close-help">Close</button>
   `;
   
