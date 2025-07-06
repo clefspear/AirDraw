@@ -190,7 +190,17 @@ function showQuickNotification(message, color = '#4CAF50') {
   // Set a new timeout
   window.notificationTimeout = setTimeout(() => {
     notification.style.opacity = '0';
+    
+    // After notification fades, ensure debug button text is synced
+    if (window.syncDebugState) {
+      setTimeout(window.syncDebugState, 300);
+    }
   }, 2000);
+  
+  // Make sure debug is visible and button says "Hide" when notification is shown
+  if (window.syncDebugState) {
+    window.syncDebugState();
+  }
 }
 
 // Process color commands from voice input
@@ -540,6 +550,16 @@ function createVoiceUI() {
     }
   `;
   document.head.appendChild(style);
+
+  // Check if debug panel is hidden initially, and hide color display too
+  const debugInfo = document.getElementById('debug-info');
+  if (debugInfo && 
+      (getComputedStyle(debugInfo).opacity === '0' || 
+      getComputedStyle(debugInfo).display === 'none' || 
+      debugInfo.style.display === 'none')) {
+    colorDisplay.style.opacity = '0';
+    colorDisplay.style.display = 'none';
+  }
   
   console.log('Voice UI created successfully');
 }
@@ -562,6 +582,11 @@ function updateColorDisplay(hexColor, colorName) {
     
     // Update the pointers with the new color
     updatePointers(hexColor);
+    
+    // Make sure debug button text is synced after color change
+    if (window.syncDebugState) {
+      window.syncDebugState();
+    }
   } else {
     console.warn('Color display elements not found');
   }

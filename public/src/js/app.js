@@ -47,6 +47,49 @@ window.airdrawState = {
   fingerCount: 0
 };
 
+// This will be our centralized function to sync debug state and button text
+function syncDebugState(forceState = null) {
+  const debugInfoElement = document.getElementById('debug-info');
+  const debugToggleBtnElement = document.getElementById('debug-toggle');
+  const colorDisplay = document.getElementById('current-color');
+  
+  if (!debugInfoElement || !debugToggleBtnElement) return;
+  
+  // Get current state if not forcing a specific state
+  let isVisible = forceState;
+  if (isVisible === null) {
+    isVisible = getComputedStyle(debugInfoElement).display !== 'none' && 
+                getComputedStyle(debugInfoElement).opacity !== '0';
+  }
+  
+  // Apply the correct state
+  if (isVisible) {
+    // Show debug panel
+    debugInfoElement.style.opacity = '1';
+    debugInfoElement.style.display = 'block';
+    debugToggleBtnElement.textContent = 'Hide';
+    
+    // Also show color display
+    if (colorDisplay) {
+      colorDisplay.style.opacity = '1';
+      colorDisplay.style.display = 'flex';
+    }
+  } else {
+    // Hide debug panel
+    debugInfoElement.style.opacity = '0';
+    debugInfoElement.style.display = 'none';
+    debugToggleBtnElement.textContent = 'Debug';
+    
+    // Also hide color display
+    if (colorDisplay) {
+      colorDisplay.style.opacity = '0';
+      colorDisplay.style.display = 'none';
+    }
+  }
+  
+  console.log(`Debug panel ${isVisible ? 'shown' : 'hidden'}, button text updated to "${debugToggleBtnElement.textContent}"`);
+}
+
 // Function to update the global state
 function updateGlobalState() {
   window.airdrawState.penColor = penColor;
@@ -132,6 +175,24 @@ function createSecondPointer() {
   return pointer2;
 }
 
+// Function to update the debug button text based on the actual state of the debug panel
+// Function to update the debug button text based on the actual state of the debug panel
+function updateDebugButtonText() {
+  const debugInfoElement = document.getElementById('debug-info');
+  const debugToggleBtnElement = document.getElementById('debug-toggle');
+  
+  if (!debugInfoElement || !debugToggleBtnElement) return;
+  
+  // Check the actual current visibility of the debug panel
+  const isVisible = getComputedStyle(debugInfoElement).display !== 'none' && 
+                    getComputedStyle(debugInfoElement).opacity !== '0';
+  
+  // Update button text based on current visibility without changing visibility
+  debugToggleBtnElement.textContent = isVisible ? 'Hide' : 'Debug';
+  
+  console.log(`Button text updated to "${debugToggleBtnElement.textContent}" based on panel visibility`);
+}
+
 // Add keyboard event listeners
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', (e) => {
@@ -139,28 +200,16 @@ function setupKeyboardShortcuts() {
     if (e.key.toLowerCase() === 'd') {
       // Get fresh reference to the debug panel
       const debugInfoElement = document.getElementById('debug-info');
-      const debugToggleBtnElement = document.getElementById('debug-toggle');
-      
       if (!debugInfoElement) return;
       
       // Get the current state
       const computedStyle = getComputedStyle(debugInfoElement);
       const isHidden = computedStyle.opacity === '0' || 
-                       computedStyle.display === 'none' || 
-                       debugInfoElement.style.opacity === '0';
-                       
-      // Force the update regardless of current state to ensure it works
-      if (isHidden) {
-        // Show debug panel
-        debugInfoElement.style.opacity = '1';
-        debugInfoElement.style.display = 'block';
-        if (debugToggleBtnElement) debugToggleBtnElement.textContent = 'Hide';
-      } else {
-        // Completely hide debug panel
-        debugInfoElement.style.opacity = '0';
-        debugInfoElement.style.display = 'none';
-        if (debugToggleBtnElement) debugToggleBtnElement.textContent = 'Debug';
-      }
+                      computedStyle.display === 'none' || 
+                      debugInfoElement.style.opacity === '0';
+      
+      // Toggle the state (show if hidden, hide if visible)
+      syncDebugState(isHidden);
       
       // Prevent any default behavior
       e.preventDefault();
@@ -197,6 +246,9 @@ function initializeVoiceRecognition() {
       
       // Update pen icon color
       updatePointerColors(hexColor);
+      
+      // Make sure debug button text stays in sync
+      syncDebugState();
       
       console.log(`Voice command: Changed color to ${colorName} (${hexColor})`);
     });
@@ -248,6 +300,8 @@ function updatePointerColors(hexColor) {
 }
 
 // Show a notification when color changes
+// Update the showColorChangeNotification function in app.js:
+
 function showColorChangeNotification(colorName, hexColor) {
   // Create notification element if it doesn't exist
   let notification = document.getElementById('color-notification');
@@ -303,7 +357,36 @@ function showColorChangeNotification(colorName, hexColor) {
   // Set a new timeout
   window.notificationTimeout = setTimeout(() => {
     notification.style.opacity = '0';
+    
+    // Get the current debug state - DON'T force it to be visible
+    const debugInfoElement = document.getElementById('debug-info');
+    if (debugInfoElement) {
+      // After notification fades, ensure debug button text is synced with current state
+      setTimeout(() => {
+        // Just sync the button text with current state, don't change visibility
+        const isCurrentlyVisible = getComputedStyle(debugInfoElement).display !== 'none' && 
+                                   getComputedStyle(debugInfoElement).opacity !== '0';
+        
+        // Don't change visibility, just update the button text
+        const debugToggleBtnElement = document.getElementById('debug-toggle');
+        if (debugToggleBtnElement) {
+          debugToggleBtnElement.textContent = isCurrentlyVisible ? 'Hide' : 'Debug';
+        }
+      }, 300);
+    }
   }, 3000);
+  
+  // Just update the button text without changing debug panel visibility
+  const debugInfoElement = document.getElementById('debug-info');
+  const debugToggleBtnElement = document.getElementById('debug-toggle');
+  
+  if (debugInfoElement && debugToggleBtnElement) {
+    const isCurrentlyVisible = getComputedStyle(debugInfoElement).display !== 'none' && 
+                               getComputedStyle(debugInfoElement).opacity !== '0';
+    
+    // Update button text based on current visibility
+    debugToggleBtnElement.textContent = isCurrentlyVisible ? 'Hide' : 'Debug';
+  }
 }
 
 // Add visual feedback when color changes
@@ -804,23 +887,17 @@ async function main() {
         if (!debugInfoElement) return;
         
         const isHidden = getComputedStyle(debugInfoElement).opacity === '0' || 
-                         debugInfoElement.style.display === 'none';
+                        debugInfoElement.style.display === 'none';
         
-        if (isHidden) {
-          // Show debug panel
-          debugInfoElement.style.opacity = '1';
-          debugInfoElement.style.display = 'block';
-          this.textContent = 'Hide';
-        } else {
-          // Completely hide debug panel
-          debugInfoElement.style.opacity = '0';
-          debugInfoElement.style.display = 'none';
-          this.textContent = 'Debug';
-        }
-        
-        console.log(`Debug panel ${isHidden ? 'shown' : 'hidden'}`);
+        // Toggle the state (show if hidden, hide if visible)
+        syncDebugState(isHidden);
       });
     }
+    
+    // Make sure the button text is synchronized initially
+    setTimeout(() => {
+      syncDebugState();
+    }, 500);
     
     console.log("AirDraw initialized successfully");
   } catch (err) {
@@ -843,6 +920,9 @@ async function main() {
     document.body.appendChild(errorMsg);
   }
 }
+
+// Make the syncDebugState function available globally
+window.syncDebugState = syncDebugState;
 
 // Start the application
 main();
