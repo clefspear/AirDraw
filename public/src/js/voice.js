@@ -122,10 +122,26 @@ function toggleVoiceRecognition(recognition) {
     // Turn off
     recognition.stopListening();
     showQuickNotification('Voice recognition paused (SPACE)', '#f44336');
+    
+    // Update button appearance
+    if (voiceBtn) {
+      voiceBtn.classList.remove('voice-active');
+      voiceBtn.innerHTML = '🎤 Voice (Off)';
+      voiceBtn.style.backgroundColor = 'white';
+      voiceBtn.style.color = '#333';
+    }
   } else {
     // Turn on
     recognition.resumeListening();
     showQuickNotification('Voice recognition active (SPACE)', '#4CAF50');
+    
+    // Update button appearance
+    if (voiceBtn) {
+      voiceBtn.classList.add('voice-active');
+      voiceBtn.innerHTML = '🎤 Voice';
+      voiceBtn.style.backgroundColor = '#4CAF50';
+      voiceBtn.style.color = 'white';
+    }
   }
 }
 
@@ -137,14 +153,17 @@ function updateVoiceButtonUI(isActive) {
   if (isActive) {
     voiceBtn.classList.add('voice-active');
     voiceBtn.innerHTML = '🎤 Voice';
+    voiceBtn.style.backgroundColor = '#4CAF50'; // Add this
+    voiceBtn.style.color = 'white'; // Add this
     console.log('Voice button UI updated: active');
   } else {
     voiceBtn.classList.remove('voice-active');
     voiceBtn.innerHTML = '🎤 Voice (Off)';
+    voiceBtn.style.backgroundColor = 'white'; // Add this
+    voiceBtn.style.color = '#333'; // Add this
     console.log('Voice button UI updated: inactive');
   }
 }
-
 // Show a quick notification
 function showQuickNotification(message, color = '#4CAF50') {
   // Create notification element if it doesn't exist

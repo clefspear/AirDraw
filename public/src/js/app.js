@@ -51,8 +51,7 @@ window.airdrawState = {
   fingerCount: 0
 };
 
-// This will be our centralized function to sync debug state and button text
-// This will be our centralized function to sync debug state and button text
+/// This will be our centralized function to sync debug state and button text
 function syncDebugState(forceState = null) {
   const debugInfoElement = document.getElementById('debug-info');
   const debugToggleBtnElement = document.getElementById('debug-toggle');
@@ -64,8 +63,8 @@ function syncDebugState(forceState = null) {
   // Get current state if not forcing a specific state
   let isVisible = forceState;
   if (isVisible === null) {
-    isVisible = getComputedStyle(debugInfoElement).display !== 'none' && 
-                getComputedStyle(debugInfoElement).opacity !== '0';
+    isVisible = getComputedStyle(debugInfoElement).display !== 'none' &&
+    getComputedStyle(debugInfoElement).opacity !== '0';
   }
   
   // Apply the correct state
@@ -104,6 +103,13 @@ function syncDebugState(forceState = null) {
   }
   
   console.log(`Debug panel ${isVisible ? 'shown' : 'hidden'}, button text updated to "${debugToggleBtnElement.textContent}"`);
+  
+  // Store the state in localStorage so it persists across page loads
+  try {
+    localStorage.setItem('debugPanelVisible', isVisible ? 'true' : 'false');
+  } catch (e) {
+    console.log('Could not save debug panel state');
+  }
 }
 
 // Function to update the global state
@@ -1191,14 +1197,30 @@ async function main() {
       console.log(`Voice command: Changed color to ${colorName} (${hexColor})`);
     });
     
-    // Make sure the button text is synchronized initially
-    setTimeout(() => {
-      syncDebugState(false);
-    }, 500);
-    
+    // Initialize debug panel state - hidden by default
+  let initialDebugState = false;
+
+  // Try to load saved state from localStorage (if available)
+  try {
+    const savedState = localStorage.getItem('debugPanelVisible');
+    if (savedState) {
+      initialDebugState = savedState === 'true';
+    }
+  } catch (e) {
+    // Local storage not available, use default (false)
+  }
+
+  // Force the debug panel to the initial state (default: hidden)
+  setTimeout(() => {
+    syncDebugState(initialDebugState);
+  }, 500);
+
+
     console.log("AirDraw initialized successfully");
   } catch (err) {
     console.error("Error initializing AirDraw:", err);
+
+
     
     // Show error message
     const errorMsg = document.createElement('div');
