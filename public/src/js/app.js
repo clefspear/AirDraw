@@ -443,14 +443,14 @@ function updateCameraFingersInfo(results) {
   }
   
   // Update camera fingers text based on hands detected
-  let statusText = '';
-  if (hands['Left'] && hands['Right']) {
-    statusText = `Left hand (${leftFingerCount} fingers) & Right hand (${rightFingerCount} fingers)`;
-  } else if (hands['Left']) {
-    statusText = `Left hand (${leftFingerCount} fingers)`;
-  } else if (hands['Right']) {
-    statusText = `Right hand (${rightFingerCount} fingers)`;
-  }
+let statusText = '';
+if (hands['Left'] && hands['Right']) {
+  statusText = `Right (${leftFingerCount} fingers) & Left (${rightFingerCount} fingers)`;
+} else if (hands['Left']) {
+  statusText = `Right (${leftFingerCount} fingers)`;
+} else if (hands['Right']) {
+  statusText = `Left (${rightFingerCount} fingers)`;
+}
   
   cameraFingers.textContent = statusText;
   cameraFingers.style.color = '#0a0';
@@ -604,6 +604,8 @@ function onResults(results) {
 }
 
 // Process a single hand
+// Update the processHand function to ensure the global state is updated with the active tool
+
 function processHand(landmarks, handType, pointerElement, handIndex) {
   // Make sure pointer element exists
   if (!pointerElement) return;
@@ -641,6 +643,12 @@ function processHand(landmarks, handType, pointerElement, handIndex) {
   } else if (fingerCount >= 1 && fingerCount <= 3) {
     // 1-3 fingers up - use pen tool
     activeTool = 'pen';
+  }
+  
+  // IMPORTANT FIX: Update the global state with the active tool for the first hand
+  if (handIndex === 0) {
+    window.airdrawState.tool = activeTool;
+    tool = activeTool; // Also update the local tool variable
   }
   
   // Get current position based on hand index
@@ -726,7 +734,7 @@ function processHand(landmarks, handType, pointerElement, handIndex) {
   // Show active tool in the debug panel for the first hand
   if (debugInfo && handIndex === 0) {
     if (window.debugJsActive) {
-      // Let debug.js handle this
+      // Let debug.js handle this with updated state
     } else {
       // If we're managing the debug panel, update it with the current active tool
       const lines = debugInfo.textContent.split('\n');
@@ -835,9 +843,6 @@ async function main() {
     document.body.appendChild(errorMsg);
   }
 }
-
-// Make keyboard shortcuts work globally
-setupKeyboardShortcuts();
 
 // Start the application
 main();
