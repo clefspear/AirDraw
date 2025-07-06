@@ -72,9 +72,6 @@
       }
     }
     
-    // NOTE: We don't add any click or keyboard event handlers for debug toggle
-    // as those are now handled exclusively in app.js
-    
     // Variables for debug info
     let frameCount = 0;
     let lastFrameTime = performance.now();
@@ -319,13 +316,18 @@
         debugInfo.textContent += `\nFingers up: ${totalFingerCount}`;
       }
       
-      // Add current color highlight notification if color changed recently
-      const colorNotification = document.getElementById('color-notification');
-      if (colorNotification && getComputedStyle(colorNotification).opacity !== '0') {
-        // Ensure the debug info is visible when color changes
-        debugInfo.style.opacity = '1';
-        if (debugToggleBtn) debugToggleBtn.textContent = 'Hide';
-      }
+// Add current color highlight notification if color changed recently
+const colorNotification = document.getElementById('color-notification');
+if (colorNotification && getComputedStyle(colorNotification).opacity !== '0') {
+  // Check current visibility of the debug panel
+  const isCurrentlyVisible = getComputedStyle(debugInfo).display !== 'none' && 
+                            getComputedStyle(debugInfo).opacity !== '0';
+  
+  // Just update the button text without changing the panel visibility
+  if (debugToggleBtn) {
+    debugToggleBtn.textContent = isCurrentlyVisible ? 'Hide' : 'Debug';
+  }
+}
       
       // Continue the loop
       requestAnimationFrame(updateDebug);
@@ -334,5 +336,13 @@
     // Start the update loop
     console.log('Starting debug update loop...');
     requestAnimationFrame(updateDebug);
+    
+    // Sync button text with the app.js syncDebugState function if available
+    console.log('Syncing debug button text on initial load');
+    setTimeout(() => {
+      if (window.syncDebugState) {
+        window.syncDebugState();
+      }
+    }, 1000);
   });
 })();
