@@ -22,7 +22,8 @@
 - **Cross-Platform**: Works on desktop and mobile browsers
 
 ---
-![Screenshot 2025-07-04 at 11 04 35 PM](https://github.com/user-attachments/assets/ead6de89-aa79-450f-a3cd-67acc5375263)
+
+![Screenshot 2025-07-06 at 2 59 23 AM](https://github.com/user-attachments/assets/742bdc96-0af0-4270-9b4e-3e0e24fd0008)
 
 ## 🛠️ Built With
 
