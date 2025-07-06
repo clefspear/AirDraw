@@ -1015,7 +1015,9 @@ async function main() {
         maxWidth: '260px',
         whiteSpace: 'pre-wrap',
         lineHeight: '1.4',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        display: 'none',  // Hidden by default
+        opacity: '0'      // Hidden by default
       });
     }
     
@@ -1197,7 +1199,7 @@ async function main() {
       console.log(`Voice command: Changed color to ${colorName} (${hexColor})`);
     });
     
-    // Initialize debug panel state - hidden by default
+  // Initialize debug panel state - hidden by default
   let initialDebugState = false;
 
   // Try to load saved state from localStorage (if available)
@@ -1210,10 +1212,15 @@ async function main() {
     // Local storage not available, use default (false)
   }
 
-  // Force the debug panel to the initial state (default: hidden)
-  setTimeout(() => {
-    syncDebugState(initialDebugState);
-  }, 500);
+  // Force debug panel to be hidden initially
+  syncDebugState(false);
+
+  // If saved state is to show, apply it after a delay
+  if (initialDebugState) {
+    setTimeout(() => {
+      syncDebugState(true);
+    }, 500);
+  }
 
 
     console.log("AirDraw initialized successfully");

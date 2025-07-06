@@ -29,8 +29,8 @@
       whiteSpace: 'pre-wrap',
       lineHeight: '1.4',
       border: '1px solid rgba(255, 255, 255, 0.2)',
-      display: 'block',
-      opacity: '1'
+      display: 'none',  // Hidden by default
+      opacity: '0' 
     });
     
     // Create or fix camera-fingers
